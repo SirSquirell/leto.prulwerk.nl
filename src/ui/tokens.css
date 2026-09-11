@@ -1,0 +1,96 @@
+/* Leto app UI tokens, Direction A (docs/DESIGN-BRIEF.md). Every colour and font value
+   in the app is defined here exactly once; other stylesheets only assign tokens. Light
+   is the base; dark is the same hierarchy on a dark ground, never an inversion. */
+
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 400; font-display: swap; src: url(../../fonts/ibm-plex-sans-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 500; font-display: swap; src: url(../../fonts/ibm-plex-sans-latin-500-normal.woff2) format('woff2'); }
+@font-face { font-family: 'IBM Plex Sans'; font-weight: 600; font-display: swap; src: url(../../fonts/ibm-plex-sans-latin-600-normal.woff2) format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 400; font-display: swap; src: url(../../fonts/ibm-plex-mono-latin-400-normal.woff2) format('woff2'); }
+@font-face { font-family: 'IBM Plex Mono'; font-weight: 500; font-display: swap; src: url(../../fonts/ibm-plex-mono-latin-500-normal.woff2) format('woff2'); }
+
+:root {
+  /* light */
+  --l-page: #F5F5F7;
+  --l-surface: #FFFFFF;
+  --l-line: #DDDDE3;
+  --l-line-2: #ECECF0;
+  --l-ink: #141420;
+  --l-text-2: #5C5C6B;
+  --l-label: #6E6E7E;
+  --l-accent: #6A4BD1;        /* line and text: 6.1:1 on white */
+  --l-accent-fill: #9F86F5;   /* fills: ink on it 5.9:1 */
+  --l-on-accent: #12120F;
+  --l-selected: #141420;
+  --l-on-selected: #FFFFFF;
+  --l-ok: #1F6F44;
+  --l-warn: #9C5708;
+  --l-error: #B8385A;
+  --l-cash: #7A7A75;
+
+  /* dark: same roles, measured on #0F0F14 and #17171E */
+  --d-page: #0F0F14;
+  --d-surface: #17171E;
+  --d-line: #2A2A34;
+  --d-line-2: #20202A;
+  --d-ink: #F0F0F4;
+  --d-text-2: #A2A2B0;
+  --d-label: #8A8A98;
+  --d-accent: #B79CFF;        /* 8.3:1 on surface */
+  --d-accent-fill: #B79CFF;
+  --d-on-accent: #12120F;
+  --d-selected: #F0F0F4;
+  --d-on-selected: #0F0F14;
+  --d-ok: #63C08A;
+  --d-warn: #F2A65A;
+  --d-error: #F27A93;
+  --d-cash: #8A8A86;
+
+  /* chart slots, measured by tools/check-palette.mjs: 3:1 on both surfaces, CIE76 ΔE ≥ 12 apart
+     in normal vision and in protanopia, deuteranopia and tritanopia (Machado 2009) */
+  --l-slot-1: #6A4BD1; --l-slot-2: #C67A2F; --l-slot-3: #6B2673; --l-slot-4: #7C1D1D;
+  --l-slot-5: #2F8AC6; --l-slot-6: #947342; --l-slot-7: #5C2395;
+  --d-slot-1: #B79CFF; --d-slot-2: #51D651; --d-slot-3: #5F51D6; --d-slot-4: #EBC9A8;
+  --d-slot-5: #AFDAE4; --d-slot-6: #6B9CBD; --d-slot-7: #D65F51;
+
+  /* assignment, light as the base */
+  --page: var(--l-page); --surface: var(--l-surface); --line: var(--l-line); --line-2: var(--l-line-2);
+  --ink: var(--l-ink); --text-2: var(--l-text-2); --label: var(--l-label);
+  --accent: var(--l-accent); --accent-fill: var(--l-accent-fill); --on-accent: var(--l-on-accent);
+  --selected: var(--l-selected); --on-selected: var(--l-on-selected);
+  --ok: var(--l-ok); --warn: var(--l-warn); --error: var(--l-error); --cash: var(--l-cash);
+  --slot-1: var(--l-slot-1); --slot-2: var(--l-slot-2); --slot-3: var(--l-slot-3); --slot-4: var(--l-slot-4);
+  --slot-5: var(--l-slot-5); --slot-6: var(--l-slot-6); --slot-7: var(--l-slot-7);
+  color-scheme: light;
+
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --r-panel: 8px;
+  --r-control: 6px;
+  --gutter: 48px;
+  --kpi-col: 300px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --page: var(--d-page); --surface: var(--d-surface); --line: var(--d-line); --line-2: var(--d-line-2);
+    --ink: var(--d-ink); --text-2: var(--d-text-2); --label: var(--d-label);
+    --accent: var(--d-accent); --accent-fill: var(--d-accent-fill); --on-accent: var(--d-on-accent);
+    --selected: var(--d-selected); --on-selected: var(--d-on-selected);
+    --ok: var(--d-ok); --warn: var(--d-warn); --error: var(--d-error); --cash: var(--d-cash);
+    --slot-1: var(--d-slot-1); --slot-2: var(--d-slot-2); --slot-3: var(--d-slot-3); --slot-4: var(--d-slot-4);
+    --slot-5: var(--d-slot-5); --slot-6: var(--d-slot-6); --slot-7: var(--d-slot-7);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --page: var(--d-page); --surface: var(--d-surface); --line: var(--d-line); --line-2: var(--d-line-2);
+  --ink: var(--d-ink); --text-2: var(--d-text-2); --label: var(--d-label);
+  --accent: var(--d-accent); --accent-fill: var(--d-accent-fill); --on-accent: var(--d-on-accent);
+  --selected: var(--d-selected); --on-selected: var(--d-on-selected);
+  --ok: var(--d-ok); --warn: var(--d-warn); --error: var(--d-error); --cash: var(--d-cash);
+  --slot-1: var(--d-slot-1); --slot-2: var(--d-slot-2); --slot-3: var(--d-slot-3); --slot-4: var(--d-slot-4);
+  --slot-5: var(--d-slot-5); --slot-6: var(--d-slot-6); --slot-7: var(--d-slot-7);
+  color-scheme: dark;
+}

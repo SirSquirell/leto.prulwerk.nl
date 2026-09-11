@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Leto, portfolio history for Trading 212</title>
+<meta name="description" content="Leto reconstructs what your Trading 212 account was worth every day, how much of that you paid in, and how the weight of each holding shifted. In your browser, from the official API, with your own read-only key.">
+<meta name="theme-color" content="#050505" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F4F4F1" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preload" href="/fonts/archivo-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+/* Huisstijl prulwerk.nl, brandingsheet v1, with Leto's own accent. Every value once. */
+@font-face{font-family:"Archivo";font-weight:900;font-display:swap;src:url(/fonts/archivo-latin-900-normal.woff2) format("woff2")}
+@font-face{font-family:"Instrument Sans";font-weight:400;font-display:swap;src:url(/fonts/instrument-sans-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Instrument Sans";font-weight:600;font-display:swap;src:url(/fonts/instrument-sans-latin-600-normal.woff2) format("woff2")}
+@font-face{font-family:"JetBrains Mono";font-weight:400;font-display:swap;src:url(/fonts/jetbrains-mono-latin-400-normal.woff2) format("woff2")}
+:root{
+  --d-bg:#050505; --d-surface:#101010; --d-surface-2:#191919; --d-line:#262626;
+  --d-text:#F2F2F0; --d-text-2:#9A9A96; --d-text-3:#6B6B67;
+  --d-accent:#B79CFF; --d-accent-line:#B79CFF; --d-prul:#C9F531;
+  --l-bg:#F4F4F1; --l-surface:#FFFFFF; --l-surface-2:#EDEDE9; --l-line:#E3E3DD;
+  --l-text:#12120F; --l-text-2:#5A5A55; --l-text-3:#86867F;
+  --l-accent:#9F86F5; --l-accent-line:#6A4BD1; --l-prul:#A6D400;
+  --bg:var(--d-bg); --surface:var(--d-surface); --surface-2:var(--d-surface-2); --line:var(--d-line);
+  --text:var(--d-text); --text-2:var(--d-text-2); --text-3:var(--d-text-3);
+  --accent:var(--d-accent); --accent-line:var(--d-accent-line); --prul:var(--d-prul);
+  --on-accent:#12120F; --r-card:18px;
+  --display:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){color-scheme:light;
+    --bg:var(--l-bg); --surface:var(--l-surface); --surface-2:var(--l-surface-2); --line:var(--l-line);
+    --text:var(--l-text); --text-2:var(--l-text-2); --text-3:var(--l-text-3);
+    --accent:var(--l-accent); --accent-line:var(--l-accent-line); --prul:var(--l-prul)}
+}
+:root[data-theme="light"]{color-scheme:light;
+  --bg:var(--l-bg); --surface:var(--l-surface); --surface-2:var(--l-surface-2); --line:var(--l-line);
+  --text:var(--l-text); --text-2:var(--l-text-2); --text-3:var(--l-text-3);
+  --accent:var(--l-accent); --accent-line:var(--l-accent-line); --prul:var(--l-prul)}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.5}
+a{color:var(--text)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent-line);outline-offset:3px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px 0}
+.mark{font-family:var(--display);font-weight:900;font-size:19px;letter-spacing:-.02em;text-decoration:none;color:var(--text)}
+.mark span{color:var(--prul);font-weight:900}
+nav a{color:var(--text-2);text-decoration:none;font-size:14px;margin-left:18px}
+nav a:hover{color:var(--text)}
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:40px;align-items:center;padding:36px 0 24px}
+@media (max-width:820px){.hero{grid-template-columns:minmax(0,1fr)}}
+.kicker{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--text-2);letter-spacing:.04em;text-transform:uppercase}
+h1{font-family:var(--display);font-weight:900;font-size:clamp(34px,6vw,64px);letter-spacing:-.035em;line-height:.94;margin:18px 0 16px;text-wrap:balance}
+.lede{color:var(--text-2);font-size:18px;max-width:34em;margin:0 0 22px}
+.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.btn{display:inline-block;border-radius:999px;padding:13px 22px;font-family:var(--display);font-weight:700;font-size:15px;text-decoration:none;border:1px solid transparent;cursor:pointer}
+.btn-primary{background:var(--accent);color:var(--on-accent)}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--line);font-family:var(--body);font-weight:600}
+.fine{font-family:var(--mono);font-size:12px;color:var(--text-3);margin:14px 0 0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:22px}
+.stat .k{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3)}
+.stat .v{font-family:var(--mono);font-size:clamp(26px,4vw,38px);line-height:1;margin:8px 0 6px}
+.stat .s{color:var(--text-2);font-size:14px}
+.stat svg{display:block;width:100%;height:auto;margin-top:16px}
+.stat .note{color:var(--text-3);font-size:13px;margin:12px 0 0}
+section.doubts{padding:36px 0}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+@media (max-width:960px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.grid{grid-template-columns:minmax(0,1fr)}}
+.grid h3{font-family:var(--display);font-weight:900;font-size:22px;letter-spacing:-.035em;line-height:.96;margin:10px 0 8px}
+.grid p{color:var(--text-2);font-size:15px;margin:0}
+section.how{padding:8px 0 36px}
+section.how h2{font-family:var(--display);font-weight:900;font-size:clamp(26px,4vw,36px);letter-spacing:-.035em;line-height:.96;margin:0 0 14px}
+section.how ol{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;counter-reset:s}
+@media (max-width:820px){section.how ol{grid-template-columns:minmax(0,1fr)}}
+section.how li{background:var(--surface-2);border-radius:14px;padding:18px;counter-increment:s;color:var(--text-2);font-size:15px}
+section.how li::before{content:counter(s);display:block;font-family:var(--mono);font-size:12px;color:var(--accent-line);margin-bottom:6px}
+section.how li b{color:var(--text);font-weight:600}
+.state{font-size:14px;color:var(--text-2);margin:10px 0 0}
+footer{border-top:1px solid var(--line);padding:22px 0 40px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;color:var(--text-3);font-size:13px}
+footer a{color:var(--text-2)}
+footer .ver{font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="mark" href="https://prulwerk.nl/">prulwerk<span>.nl</span></a>
+    <nav><a href="#doubts">Where the data goes</a><a href="#install">Install</a><a href="https://github.com/SirSquirell/Trading212helper">Source</a></nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <p class="kicker">
+          <svg width="28" height="28" viewBox="0 0 512 512" role="img" aria-label="Leto"><rect width="512" height="512" rx="96" fill="#050505"/><path d="M368 320 A124 124 0 1 1 256 144" fill="none" stroke="#F2F2F0" stroke-width="56" stroke-linecap="round"/><path d="M256 144 A124 124 0 0 1 368 320" fill="none" stroke="#B79CFF" stroke-width="56" stroke-linecap="round"/></svg>
+          Leto, portfolio history for Trading 212
+        </p>
+        <h1>What your account was worth, every day, and what it was made of.</h1>
+        <p class="lede">Leto reconstructs from your own transactions and public price history what your Trading 212 portfolio was worth each day, how much of that you paid in, and how the weight of each holding shifted. In your browser. Nowhere else.</p>
+        <div class="cta">
+          <a class="btn btn-primary" id="install" href="https://github.com/SirSquirell/Trading212helper/releases">Install from the GitHub release (Web Store listing pending)</a>
+          <button class="btn btn-ghost" id="demo" type="button">Open the demo first</button>
+        </div>
+        <p class="state" id="demostate" role="status" aria-live="polite">The demo runs inside the extension on generated data.</p>
+        <p class="fine">Chrome · free · open source · no account · one read-only key</p>
+      </div>
+      <div class="card stat" aria-label="Demo figures">
+        <p class="k">Whole history · demo data</p>
+        <p class="v">€ 81.987,04</p>
+        <p class="s">of which € 73.750,00 paid in</p>
+        <svg viewBox="0 0 560 200" role="img" aria-label="Share of total per instrument over time, demo data">
+          <path d="M0 200 L0 80 L140 92 L280 108 L420 122 L560 130 L560 200 Z" fill="#B79CFF"/>
+          <path d="M0 80 L0 40 L140 50 L280 62 L420 70 L560 74 L560 130 L420 122 L280 108 L140 92 Z" fill="#5BB8F0"/>
+          <path d="M0 40 L0 22 L140 26 L280 30 L420 34 L560 36 L560 74 L420 70 L280 62 L140 50 Z" fill="#63C08A"/>
+          <path d="M0 22 L0 12 L140 12 L280 14 L420 16 L560 18 L560 36 L420 34 L280 30 L140 26 Z" fill="#F2A65A"/>
+          <path d="M0 12 L0 6 L140 6 L280 6 L420 8 L560 8 L560 18 L420 16 L280 14 L140 12 Z" fill="#F27A93"/>
+          <path d="M0 6 L0 0 L560 0 L560 8 L420 8 L280 6 L140 6 Z" fill="#8A8A86"/>
+        </svg>
+        <p class="note">Every figure on this page comes out of the demo mode on generated data, run and copied, not written by hand.</p>
+      </div>
+    </section>
+
+    <section class="doubts" id="doubts">
+      <div class="grid">
+        <div class="card"><p class="stat k">Where the data goes</p><h3>Nowhere.</h3><p>No server, no account. Everything lands in your browser's own database and stays there. Leto may only talk to Trading 212's own hosts, and the browser enforces that.</p></div>
+        <div class="card"><p class="stat k">The key</p><h3>Read-only, yours, local.</h3><p>You create an API key in the Trading 212 app with read permissions only and paste it once. It is stored in the extension, sent only to Trading 212, and revoked in the app whenever you like.</p></div>
+        <div class="card"><p class="stat k">Trading</p><h3>It cannot.</h3><p>Leto only reads: positions, orders, dividends, cash and public prices. It cannot place, change or cancel anything, and your key should not allow it either.</p></div>
+        <div class="card"><p class="stat k">Not from Trading 212</p><h3>A personal project.</h3><p>Not affiliated, not endorsed. It uses the official API the way the API is meant to be used. It is a calculator on your own past, not advice.</p></div>
+      </div>
+    </section>
+
+    <section class="how">
+      <h2>Three steps, no terminal.</h2>
+      <ol>
+        <li><b>Install from the Chrome Web Store.</b> Signed, updated automatically, removable in one click.</li>
+        <li><b>Create a read-only key</b> in the Trading 212 app under settings, API. Tick only the read permissions.</li>
+        <li><b>Paste it once.</b> The first sync takes a few minutes, one request at a time. Then open Leto from the toolbar.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <span>Leto · a project of <a href="https://prulwerk.nl/">prulwerk.nl</a> · sibling of <a href="https://asteria.prulwerk.nl/">Asteria</a> · <a href="https://github.com/SirSquirell/Trading212helper/issues">Report a bug</a></span>
+    <span class="ver">extension <b id="ver">0.9.0</b> · page <b id="sitever">2026-09-08</b></span>
+  </footer>
+</div>
+<script src="/demo-button.js"></script>
+</body>
+</html>
