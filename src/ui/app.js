@@ -19,6 +19,7 @@ import * as charts from './charts.js';
 import { buildReport } from './report.js';
 import { NOTICES, render as renderNotice } from '../lib/notices.js';
 import { renderConnect } from './connect.js';
+import { isExtensionPage } from './host.js';
 
 import * as overview from './sections/overview.js';
 import * as performance from './sections/performance.js';
@@ -201,6 +202,16 @@ function send(message) {
       resolve(null);
     }
   });
+}
+
+/** True only on the extension's own page. The demo host serves a copy of this app
+ * (US-81); there the connect screen must never render (US-83). */
+function insideExtension() {
+  try {
+    return isExtensionPage(window.location.protocol, typeof chrome !== 'undefined' && chrome.runtime ? chrome.runtime.id : null);
+  } catch {
+    return false;
+  }
 }
 
 function manifestVersion() {
@@ -761,6 +772,38 @@ function render() {
   root.replaceChildren();
   root.removeAttribute('aria-busy');
 
+  if (state.screen === 'outside') {
+    root.appendChild(
+      el(
+        'header',
+        { class: 'topbar' },
+        el(
+          'div',
+          { class: 'topbar__left' },
+          el('div', { class: 'brand' }, mark(22), el('span', { class: 'brand__word', text: 'Leto' })),
+        ),
+      ),
+    );
+    root.appendChild(
+      el(
+        'div',
+        { class: 'connect' },
+        el('h1', { text: copy.OUTSIDE.title }),
+        el(
+          'div',
+          { class: 'connect__body' },
+          copy.OUTSIDE.body.map((paragraph) => el('p', { text: paragraph })),
+        ),
+        el(
+          'div',
+          { class: 'actions' },
+          el('a', { class: 'btn btn--primary', href: '/demo/', text: copy.OUTSIDE.demo }),
+        ),
+      ),
+    );
+    return;
+  }
+
   if (state.screen === 'connect') {
     root.appendChild(
       el(
@@ -886,6 +929,12 @@ async function boot() {
 
   if (state.demo) {
     await reload();
+    return;
+  }
+
+  if (!insideExtension()) {
+    state.screen = 'outside';
+    render();
     return;
   }
 

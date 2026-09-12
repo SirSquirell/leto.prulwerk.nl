@@ -144,5 +144,18 @@ export const FIRST_RUN = Object.freeze({
   demo: 'Open the demo instead',
 });
 
+/** Shown when the app runs anywhere but inside the extension (US-83). It never
+ * offers a field: a page on a website that asks for the key is the shape rule 1
+ * forbids, whoever serves it. */
+export const OUTSIDE = Object.freeze({
+  title: 'This is not the extension',
+  body: [
+    'Leto runs as a Chrome extension, and only there does it hold your key. What you are looking at is the same app served as a web page so that the demo can run without installing anything.',
+    'It will never ask for your Trading 212 key here, and you should never type that key into a web page, this one included.',
+  ],
+  demo: 'Open the demo on generated data',
+  install: 'Install the extension',
+});
+
 export const TAX_DISCLAIMER =
   'These are your own figures, computed from your own data. They are not tax advice and not the tax you owe. Check them against the statements Trading 212 issues before you file.';
