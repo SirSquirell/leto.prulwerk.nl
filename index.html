@@ -95,7 +95,7 @@ footer .ver{font-family:var(--mono)}
 <div class="wrap">
   <header class="top">
     <a class="mark" href="https://prulwerk.nl/">prulwerk<span>.nl</span></a>
-    <nav><a href="#doubts">Where the data goes</a><a href="#install">Install</a><a href="https://github.com/SirSquirell/Trading212helper">Source</a></nav>
+    <nav><a href="#doubts">Where the data goes</a><a href="#install">Install</a><a href="#how">How it works</a></nav>
   </header>
 
   <main>
@@ -108,11 +108,10 @@ footer .ver{font-family:var(--mono)}
         <h1>What your account was worth, every day, and what it was made of.</h1>
         <p class="lede">Leto reconstructs from your own transactions and public price history what your Trading 212 portfolio was worth each day, how much of that you paid in, and how the weight of each holding shifted. In your browser. Nowhere else.</p>
         <div class="cta">
-          <a class="btn btn-primary" id="install" href="https://github.com/SirSquirell/Trading212helper/releases">Install from the GitHub release (Web Store listing pending)</a>
-          <button class="btn btn-ghost" id="demo" type="button">Open the demo first</button>
+          <a class="btn btn-primary" id="demo" href="/demo/">Open the web demo</a>
         </div>
-        <p class="state" id="demostate" role="status" aria-live="polite">The demo runs inside the extension on generated data.</p>
-        <p class="fine">Chrome · free · open source · no account · one read-only key</p>
+        <p class="state" id="demostate" role="status" aria-live="polite">The demo runs the same app as the extension, on generated data.</p>
+        <p class="fine" id="install">Chrome &middot; free &middot; no account &middot; one read-only key. The extension is not published yet; the install link appears here once it is.</p>
       </div>
       <div class="card stat" aria-label="Demo figures">
         <p class="k">Whole history · demo data</p>
@@ -139,10 +138,10 @@ footer .ver{font-family:var(--mono)}
       </div>
     </section>
 
-    <section class="how">
+    <section class="how" id="how">
       <h2>Three steps, no terminal.</h2>
       <ol>
-        <li><b>Install from the Chrome Web Store.</b> Signed, updated automatically, removable in one click.</li>
+        <li><b>Install the extension in Chrome.</b> Removable in one click. Until it is published you can try the web demo above, which runs the same app.</li>
         <li><b>Create a read-only key</b> in the Trading 212 app under settings, API. Tick only the read permissions.</li>
         <li><b>Paste it once.</b> The first sync takes a few minutes, one request at a time. Then open Leto from the toolbar.</li>
       </ol>
@@ -150,8 +149,8 @@ footer .ver{font-family:var(--mono)}
   </main>
 
   <footer>
-    <span>Leto · a project of <a href="https://prulwerk.nl/">prulwerk.nl</a> · sibling of <a href="https://asteria.prulwerk.nl/">Asteria</a> · <a href="https://github.com/SirSquirell/Trading212helper/issues">Report a bug</a></span>
-    <span class="ver">extension <b id="ver">0.9.0</b> · page <b id="sitever">2026-09-08</b></span>
+    <span>Leto &middot; a project of <a href="https://prulwerk.nl/">prulwerk.nl</a> &middot; sibling of <a href="https://asteria.prulwerk.nl/">Asteria</a></span>
+    <span class="ver">extension <b id="ver">0.9.0</b> &middot; page <b id="sitever">2026-09-12</b></span>
   </footer>
 </div>
 <script src="/demo-button.js"></script>
