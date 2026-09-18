@@ -44,6 +44,7 @@ const WARNING_ORDER = [
   'DIVIDEND_TYPE_UNKNOWN',
   'CORPORATE_ACTION_CASH',
   'QUANTITY_NEGATIVE',
+  'HISTORY_INCOMPLETE',
   'ESTIMATED_DAYS',
 ];
 
@@ -527,6 +528,10 @@ export function computePortfolio(input) {
   const pnl = new Array(n);
   let runningCash = 0;
   let runningPaidIn = 0;
+  // The first day the account would have spent money it never received: not a
+  // correction (the series is never clamped), a finding about the input. Rounded
+  // to cents the way reconcile.js compares, so floating dust is not a finding.
+  let historyIncompleteDay = null;
   for (let i = 0; i < n; i += 1) {
     runningCash += delta[i];
     runningPaidIn += netExternal[i];
@@ -534,7 +539,11 @@ export function computePortfolio(input) {
     paidIn[i] = runningPaidIn;
     value[i] = positionsValue[i] + cash[i];
     pnl[i] = value[i] - (i > 0 ? value[i - 1] : 0) - netExternal[i];
+    if (historyIncompleteDay === null && Math.round(cash[i] * 100) < 0) {
+      historyIncompleteDay = days[i];
+    }
   }
+  if (historyIncompleteDay !== null) warnings.bump('HISTORY_INCOMPLETE', 1, historyIncompleteDay);
 
   let estimatedDays = 0;
   for (const day of estimated) if (day) estimatedDays += 1;

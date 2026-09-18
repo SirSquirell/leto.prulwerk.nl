@@ -9,6 +9,7 @@
 // still leak the shape of the account.
 
 import { MASK, maskAmount, maskQty } from './anon.js';
+import { SYNC_STEPS } from '../lib/config.js';
 
 const MINUS = '−';
 const THIN_SPACE = ' ';
@@ -90,6 +91,42 @@ export function fmtDateRange(a, b) {
 /** @param {number} n @returns {string} '2.073 days' */
 export function fmtDays(n) {
   return `${NL_INT.format(Math.round(n))} days`;
+}
+
+/** Longer than this and the clock, not the sync, is what's wrong (rule 4: never
+ * print a guess). A day is generously past the heavy-account estimate in
+ * docs/07-DATA-ACCESS.md. */
+const MAX_PLAUSIBLE_ELAPSED_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * The one status line the app and the popup both show while a sync runs, so the
+ * two never drift (US-154). `syncState` is `{ step, page, startedAt }` from
+ * `meta.syncState`, echoed by sw.js's `status` handler; the step list comes from
+ * config.js, which is pure data, so the popup does not pull in the sync engine. `startedAt` is the worker's clock, so
+ * a negative or absurd gap between it and `now` is dropped instead of shown. Never
+ * a percentage or a time-remaining estimate: the page count of a history endpoint
+ * is unknown until its last page answers, and a forecast would be a guess.
+ * @param {{step?:string, startedAt?:number}|null|undefined} syncState
+ * @param {number} [now]
+ * @returns {string|null} null when there is no step to report
+ */
+export function fmtSyncProgress(syncState, now = Date.now()) {
+  if (!syncState || !syncState.step) return null;
+
+  const idx = SYNC_STEPS.indexOf(syncState.step);
+  const stepPart = idx === -1 ? null : `step ${idx + 1} of ${SYNC_STEPS.length}`;
+
+  let elapsedPart = null;
+  const { startedAt } = syncState;
+  if (typeof startedAt === 'number' && Number.isFinite(startedAt)) {
+    const elapsedMs = now - startedAt;
+    if (elapsedMs >= 60000 && elapsedMs <= MAX_PLAUSIBLE_ELAPSED_MS) {
+      elapsedPart = `${Math.floor(elapsedMs / 60000)} min`;
+    }
+  }
+
+  const parts = [stepPart, elapsedPart].filter(Boolean);
+  return parts.length ? `Syncing, ${parts.join(', ')}` : 'Syncing';
 }
 
 export { MASK };

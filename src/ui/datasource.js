@@ -12,6 +12,7 @@ import { reconcile } from '../lib/reconcile.js';
 import { NOTICES, render } from '../lib/notices.js';
 import { COMPOSITION_TOP } from '../lib/config.js';
 import { toISODate } from '../lib/dates.js';
+import { fmtMoney } from './format.js';
 
 const RECONCILE_CODE_BY_STATUS = Object.freeze({
   OK: 'RECONCILE_OK',
@@ -49,23 +50,27 @@ function renderWarning(warning) {
   return { code: warning.code, level: notice.level, text: render(warning.code, params), count: warning.count ?? 1 };
 }
 
-function reconciliationNotice(reconciliation) {
+function reconciliationNotice(reconciliation, currency) {
   const code = RECONCILE_CODE_BY_STATUS[reconciliation?.status] ?? 'RECONCILE_UNVERIFIED';
   const notice = NOTICES[code];
   const params = {
     count: reconciliation?.quantityDeltas?.length ?? 0,
-    delta: reconciliation?.deltaValue,
+    // The delta is read out loud in a red line; a raw float there (-749.9999569102656)
+    // reads as a bug in the reader's own money. Cents, with the account's currency.
+    delta: typeof reconciliation?.deltaValue === 'number'
+      ? fmtMoney(reconciliation.deltaValue, currency)
+      : reconciliation?.deltaValue,
   };
   return { code, level: notice.level, text: render(code, params), count: params.count };
 }
 
 /** @param {{ result:object, reconciliation:object, meta:object, demo:boolean }} args */
-function buildNotices({ result, reconciliation, meta, demo }) {
+function buildNotices({ result, reconciliation, meta, demo, currency }) {
   const list = [];
 
   for (const warning of result?.warnings ?? []) list.push(renderWarning(warning));
 
-  list.push(reconciliationNotice(reconciliation));
+  list.push(reconciliationNotice(reconciliation, currency));
 
   const hasCashUnknown = (result?.warnings ?? []).some((w) => w.code === 'CASH_UNKNOWN');
   if (!hasCashUnknown) {
@@ -183,7 +188,7 @@ export async function loadModel({ demo = false, store = null, fetchJson = null, 
   const composition = buildComposition(result, { top: COMPOSITION_TOP });
   const income = summarise({ dividends: raw.dividends, trades: raw.trades, cashRows: raw.cashRows });
   const reconciliation = reconcile(result, raw.positions, raw.summary);
-  const notices = buildNotices({ result, reconciliation, meta: raw.meta, demo });
+  const notices = buildNotices({ result, reconciliation, meta: raw.meta, demo, currency });
 
   return {
     demo,

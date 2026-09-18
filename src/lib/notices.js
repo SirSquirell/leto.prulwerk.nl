@@ -88,6 +88,10 @@ export const NOTICES = Object.freeze({
     level: 'error',
     text: '{ticker} was sold below the quantity held; the ledger is incomplete.',
   }),
+  HISTORY_INCOMPLETE: Object.freeze({
+    level: 'error',
+    text: 'The reconstructed cash goes negative on {date}, which means the history Trading 212 returned does not reach the start of the account. Every figure before that date is incomplete and the totals will not reconcile.',
+  }),
   ESTIMATED_DAYS: Object.freeze({
     level: 'note',
     text: '{count} of {total} days use a carried-forward price.',

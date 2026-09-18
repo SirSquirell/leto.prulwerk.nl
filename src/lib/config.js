@@ -61,6 +61,19 @@ export const RATE = Object.freeze({
   deadlineMs: 30000,
 });
 
+/** The seven sync steps in the order they run (docs/11-DATA-FLOW.md). Pure data,
+ * so a status line can name "step 4 of 7" without importing the sync engine and,
+ * behind it, the adapter and the network layer. */
+export const SYNC_STEPS = Object.freeze([
+  'summary',
+  'instruments',
+  'positions',
+  'orders',
+  'dividends',
+  'transactions',
+  'prices',
+]);
+
 /** Unattended sync gate. */
 export const SYNC = Object.freeze({
   staleAfterMs: 24 * 60 * 60 * 1000,

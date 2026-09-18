@@ -37,6 +37,7 @@ html, body {
 
 .why { font-size: 12.5px; color: var(--text-2); line-height: 1.45; margin: 0; }
 .why--not { color: var(--label); }
+.why--error { color: var(--error); }
 .pos { color: var(--accent); }
 
 h1 { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
@@ -59,13 +60,19 @@ p { margin: 0; }
   align-items: center;
   gap: 8px;
   white-space: nowrap;
+  transition: transform 120ms var(--ease-out);
 }
 .btn:hover { border-color: var(--accent); }
+.btn:active { transform: scale(0.98); }
 .btn[aria-pressed='true'] { background: var(--selected); color: var(--on-selected); border-color: var(--selected); }
 .btn:disabled { color: var(--label); cursor: default; border-color: var(--line-2); }
 .btn--primary { background: var(--accent-fill); color: var(--on-accent); border-color: var(--accent-fill); font-weight: 500; }
 .btn--primary:hover { border-color: var(--accent); }
 .btn--danger { color: var(--error); border-color: var(--line); }
+
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+}
 
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-control); overflow: hidden; background: var(--surface); }
 .seg button {
@@ -114,6 +121,21 @@ input[type='password'], input[type='text'], input[type='date'], select {
 
 .tabs { display: flex; gap: 22px; overflow-x: auto; min-width: 0; scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
+/* The fade sits on the side that is actually cut off, and only while something is
+ * hidden there. A fade on a side with nothing behind it would claim there is more,
+ * and it would grey out the current tab whenever that tab is the last one. */
+.tabs--cut-l {
+  mask-image: linear-gradient(to right, transparent, #000 24px);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 24px);
+}
+.tabs--cut-r {
+  mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+}
+.tabs--cut-l.tabs--cut-r {
+  mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent);
+}
 .tab {
   font-family: var(--sans);
   font-size: 13.5px;
@@ -174,7 +196,7 @@ input[type='password'], input[type='text'], input[type='date'], select {
 .kpi { display: flex; flex-direction: column; gap: 6px; padding: 16px 0; border-top: 1px solid var(--line); min-width: 0; }
 .kpi:first-child { border-top: 0; padding-top: 2px; }
 .kpi__v { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 24px; font-weight: 500; line-height: 1.1; overflow-wrap: anywhere; }
-.kpi--head .kpi__v { font-size: 32px; }
+.kpi--head .kpi__v { font-size: 32px; letter-spacing: -0.01em; }
 .kpi--last { margin-top: auto; border-top: 1px solid var(--line); }
 
 .grid3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; min-width: 0; }

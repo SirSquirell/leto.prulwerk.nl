@@ -535,6 +535,53 @@ function topbar() {
   );
 }
 
+/** US-153: the active tab can sit outside the strip's visible width on a narrow
+ * screen, with no scrollbar to show it (app.css hides it on purpose). Two things
+ * make that legible: the current tab is scrolled into view, and each edge fades
+ * only while something is hidden behind it, which is also what keeps the fade off
+ * the current tab when that tab is the last one. Measured from the live DOM, so it
+ * holds under any font, locale or zoom, and re-measured when the user scrolls it. */
+/** Width of the fade at each edge of the tab strip, matching `.tabs--cut-*`. */
+const TAB_FADE_PX = 24;
+
+function markTabCuts(tabsEl) {
+  try {
+    const hiddenLeft = tabsEl.scrollLeft > 1;
+    const hiddenRight = tabsEl.scrollLeft + tabsEl.clientWidth < tabsEl.scrollWidth - 1;
+    tabsEl.classList.toggle('tabs--cut-l', hiddenLeft);
+    tabsEl.classList.toggle('tabs--cut-r', hiddenRight);
+  } catch {
+    /* measurement unavailable; leave the strip unmasked rather than mask it wrongly */
+  }
+}
+
+function syncTabStrip(tabsEl) {
+  if (!tabsEl) return;
+  try {
+    const active = tabsEl.querySelector('[aria-current="page"]');
+    if (active && typeof active.getBoundingClientRect === 'function') {
+      // Clear of the fade band, not merely inside the strip: a current tab flush
+      // against an edge would be the one thing the fade greys out. The browser
+      // clamps the assignment, so the last tab simply lands at the end.
+      const pad = TAB_FADE_PX + 4;
+      const strip = tabsEl.getBoundingClientRect();
+      const tab = active.getBoundingClientRect();
+      let delta = 0;
+      if (tab.right > strip.right - pad) delta = tab.right - (strip.right - pad);
+      else if (tab.left < strip.left + pad) delta = tab.left - (strip.left + pad);
+      if (delta !== 0) tabsEl.scrollLeft += delta;
+    }
+  } catch {
+    /* no layout information: leave the strip where it is */
+  }
+  markTabCuts(tabsEl);
+  try {
+    tabsEl.addEventListener('scroll', () => markTabCuts(tabsEl), { passive: true });
+  } catch {
+    /* no listener: the cuts stay as measured at render time */
+  }
+}
+
 /* --------------------------------------------------------------------- bars */
 
 /** Rule: every error-level notice sits at the top of every section until it is
@@ -644,7 +691,7 @@ function pollStatus() {
     if (!status) return;
     state.status = status;
     if (status.syncState && status.syncState.step) {
-      state.syncNote = `Syncing: ${status.syncState.step}`;
+      state.syncNote = fmt.fmtSyncProgress(status.syncState, Date.now()) ?? 'Syncing';
     } else if (!state.syncing) {
       stopPolling();
     }
@@ -753,7 +800,7 @@ function pagehead(section) {
     el(
       'div',
       { class: 'pagehead__titles' },
-      el('span', { class: 'lbl', text: showPeriod ? line : 'Leto' }),
+      showPeriod ? el('span', { class: 'lbl', text: line }) : null,
       el('h1', { text: section.title || section.label }),
     ),
     showPeriod
@@ -842,6 +889,7 @@ function render() {
 
   const meta = copy.SECTIONS.find((s) => s.id === state.section) || copy.SECTIONS[0];
   root.appendChild(topbar());
+  syncTabStrip(root.querySelector('.tabs'));
   const barRow = bars();
   if (barRow) root.appendChild(barRow);
   root.appendChild(pagehead(meta));
@@ -948,7 +996,7 @@ async function boot() {
   render();
   await reload();
   if (status.syncState) {
-    state.syncNote = `Syncing: ${status.syncState.step}`;
+    state.syncNote = fmt.fmtSyncProgress(status.syncState, Date.now()) ?? 'Syncing';
     pollStatus();
   }
 }

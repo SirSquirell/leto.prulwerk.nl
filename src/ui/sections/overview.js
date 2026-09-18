@@ -55,7 +55,19 @@ function reconciliationSentence(model, ui) {
   return ui.noticeText({ code: byStatus[status] || 'RECONCILE_UNVERIFIED' });
 }
 
+/** The reason the total does not reconcile, when the input itself explains it. A
+ * reader who sees a red delta asks why; the answer belongs next to the delta and not
+ * at the bottom of a list. Its own line, because a cause is not a caption. */
+function reconciliationCause(model, ui) {
+  const status = (model.reconciliation && model.reconciliation.status) || 'UNVERIFIED';
+  if (status !== 'VALUE_MISMATCH' && status !== 'QUANTITY_MISMATCH') return null;
+  const causes = ['HISTORY_INCOMPLETE', 'QUANTITY_NEGATIVE', 'CASH_UNKNOWN'];
+  const found = (model.notices || []).find((notice) => causes.includes(notice.code));
+  return found ? ui.noticeText(found) : null;
+}
+
 export function render(host, model, ui) {
+  const cause = reconciliationCause(model, ui);
   const { el, copy } = ui;
   const result = model.result;
   const slice = ui.slice();
@@ -115,6 +127,7 @@ export function render(host, model, ui) {
           slice.days.length
         } days estimated · ${reconciliationSentence(model, ui)}`,
       }),
+      cause ? el('p', { class: 'why why--error', text: cause }) : null,
       el('p', { class: 'why why--not', text: copy.FIGURES.measured.not }),
     ),
   );

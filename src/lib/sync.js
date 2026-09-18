@@ -8,19 +8,13 @@
 // and passed straight into adapter fetch calls, never written anywhere else.
 
 import { LetoError } from './errors.js';
-import { SYNC } from './config.js';
+import { SYNC, SYNC_STEPS } from './config.js';
 import * as trading212Adapter from './brokers/trading212.js';
 
 /** The seven steps, in the order they run. Also used to compare progress on resume. */
-export const STEPS = Object.freeze([
-  'summary',
-  'instruments',
-  'positions',
-  'orders',
-  'dividends',
-  'transactions',
-  'prices',
-]);
+/** Re-exported so the steps keep one definition (config.js) and callers that
+ * already speak to the sync module do not have to know where it lives. */
+export const STEPS = SYNC_STEPS;
 
 const OVERLAP_DAYS = 7;
 const DAY_MS = 86400000;

@@ -137,6 +137,7 @@ export const FIRST_RUN = Object.freeze({
   body: [
     'Leto will read your Trading 212 account through its official API with the read-only key you paste here: your positions, your order history, your dividends, your cash movements, and public price history.',
     'It does this one request at a time and stores the results only in this browser. Nothing is sent anywhere but to Trading 212.',
+    "The first sync reads your whole history that way to stay inside Trading 212's limits, so a long history can take many minutes; it keeps going in the background, and if it is interrupted, the next sync resumes where it stopped instead of starting over.",
     'Leto cannot place, change or cancel an order, and your key should not allow it either: tick only the read permissions when you create it in the app under Settings, API.',
     'You can revoke the key in the Trading 212 app at any time, and wipe everything here with one button. Trading 212 did not make this and is not affiliated with it.',
   ],

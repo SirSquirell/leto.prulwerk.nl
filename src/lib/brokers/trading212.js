@@ -167,14 +167,18 @@ function getPath(obj, path) {
 }
 
 /** Throws SHAPE_CHANGED when the field at `path` is missing, or (with
- * `opts.type === 'number'`) present but not a number. Returns the value. */
+ * `opts.type === 'number'`) present but not a number, naming `opts.as ?? path` as the
+ * field. Returns the value. */
 export function need(obj, path, endpoint, opts = {}) {
+  // `as` names the field in the error when the path alone is ambiguous, as 'id' is
+  // when it is read from both the order and its fill (US-151).
+  const field = opts.as ?? path;
   const value = getPath(obj, path);
   if (value === undefined || value === null) {
-    throw new LetoError('SHAPE_CHANGED', { endpoint, field: path });
+    throw new LetoError('SHAPE_CHANGED', { endpoint, field });
   }
   if (opts.type === 'number' && typeof value !== 'number') {
-    throw new LetoError('SHAPE_CHANGED', { endpoint, field: path });
+    throw new LetoError('SHAPE_CHANGED', { endpoint, field });
   }
   return value;
 }
@@ -285,13 +289,15 @@ export function parseOrdersDetailed(raw) {
       continue;
     }
     const order = item.order ?? {};
-    need(order, 'id', 'orders');
+    // Named for the bug report the user sends us: 'id' alone does not say which of the
+    // two ids is missing (US-151).
+    need(order, 'id', 'orders', { as: 'order.id' });
     const side = need(order, 'side', 'orders');
     const currency = order?.instrument?.currency ?? order?.currency;
     if (currency == null) {
       throw new LetoError('SHAPE_CHANGED', { endpoint: 'orders', field: 'order.instrument.currency' });
     }
-    need(fill, 'id', 'orders');
+    need(fill, 'id', 'orders', { as: 'fill.id' });
     const filledAt = need(fill, 'filledAt', 'orders');
     const price = need(fill, 'price', 'orders', { type: 'number' });
     const rawQuantity = need(fill, 'quantity', 'orders', { type: 'number' });
@@ -303,6 +309,12 @@ export function parseOrdersDetailed(raw) {
     const taxes = (fill.walletImpact?.taxes ?? []).map((t) => {
       const amount = toNum(t.quantity);
       if (amount === null) throw new LetoError('SHAPE_CHANGED', { endpoint: 'orders', field: 'fill.walletImpact.taxes.quantity' });
+      // A tax with no name would otherwise pass through as `undefined`: invisible to
+      // TRADE_FEE_NAME_SET (silently excluded from fees, uncounted) and shown to the
+      // user as a nameless charge (rule 2, rule 4). Found by the contract test (US-151).
+      if (t.name === undefined || t.name === null) {
+        throw new LetoError('SHAPE_CHANGED', { endpoint: 'orders', field: 'fill.walletImpact.taxes.name' });
+      }
       return { name: t.name, amount };
     });
     const fees = kind === 'TRADE'
