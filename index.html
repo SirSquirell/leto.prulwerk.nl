@@ -66,6 +66,8 @@ h1{font-family:var(--display);font-weight:900;font-size:clamp(34px,6vw,64px);let
 .btn:active{transform:scale(0.98)}
 .btn-primary{background:var(--accent);color:var(--on-accent)}
 .btn-ghost{background:transparent;color:var(--text);border-color:var(--line);font-family:var(--body);font-weight:600}
+.btn:disabled{background:var(--surface-2);color:var(--text-2);border-color:var(--line);cursor:not-allowed}
+.btn:disabled:active{transform:none}
 @media (prefers-reduced-motion: reduce){.btn{transition:none}}
 .fine{font-family:var(--mono);font-size:12px;color:var(--text-3);margin:14px 0 0}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:22px}
@@ -97,7 +99,7 @@ footer .ver{font-family:var(--mono)}
 <div class="wrap">
   <header class="top">
     <a class="mark" href="https://prulwerk.nl/">prulwerk<span>.nl</span></a>
-    <nav><a href="#doubts">Where the data goes</a><a href="#install">Install</a><a href="#how">How it works</a></nav>
+    <nav><a href="#doubts">Where the data goes</a><a href="#how">Install</a><a href="#how">How it works</a></nav>
   </header>
 
   <main>
@@ -110,8 +112,8 @@ footer .ver{font-family:var(--mono)}
         <h1>What your account was worth, every day, and what it was made of.</h1>
         <p class="lede">Leto reconstructs from your own transactions and public price history what your Trading 212 portfolio was worth each day, how much of that you paid in, and how the weight of each holding shifted. In your browser. Nowhere else.</p>
         <div class="cta">
-          <button class="btn btn-primary" id="install" type="button" disabled>Not available to install yet</button>
-          <button class="btn btn-ghost" id="demo" type="button">Open the demo first</button>
+          <button class="btn btn-ghost" id="install" type="button" disabled>Not available to install yet</button>
+          <button class="btn btn-primary" id="demo" type="button">Open the web demo</button>
         </div>
         <p class="state" id="demostate" role="status" aria-live="polite">The demo runs inside the extension on generated data.</p>
         <p class="fine">Chrome · free · no account · no server · one read-only key</p>
